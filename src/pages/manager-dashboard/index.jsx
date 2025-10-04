@@ -31,6 +31,9 @@ const ManagerDashboard = () => {
   const [notifications, setNotifications] = useState([]);
   const [toasts, setToasts] = useState([]);
 
+  const pushToast = (t) => setToasts(prev => [{ id: `t-${Date.now()}-${Math.random().toString(36).slice(2,6)}`, ...t }, ...prev].slice(0, 6));
+  const replaceToast = (id, patch) => setToasts(prev => prev.map(t => t.id === id ? { ...t, ...patch } : t));
+
   useEffect(() => {
     document.title = 'Manager Dashboard - ExpenseFlow';
     realtime.startRealtimeSimulation(12000);
@@ -99,24 +102,28 @@ const ManagerDashboard = () => {
               <QuickActionButton userRole="manager" />
               <Button onClick={async () => {
                 if (!confirm('Migrate local browser-stored expenses to the local API? Make sure the API (localhost:4000) is running.')) return;
+                // create a progress toast
+                const id = `migrate-${Date.now()}`;
+                pushToast({ id, title: 'Migration started', message: 'Preparing to migrate local data...' });
                 try {
                   const start = Date.now();
-                  let lastProgress = '';
+                  let lastPct = -1;
                   const res = await migrateLocalToRemote((done, total) => {
                     const pct = Math.round((done / total) * 100);
-                    const msg = `Migrating local data: ${done}/${total} (${pct}%)`;
-                    if (msg !== lastProgress) {
-                      lastProgress = msg;
-                      console.log(msg);
+                    if (pct !== lastPct) {
+                      lastPct = pct;
+                      replaceToast(id, { title: 'Migrating local data', message: `${done}/${total} (${pct}%)` });
                     }
                   });
-                  alert(`Migration complete: ${res.migrated} of ${res.total} items migrated in ${Math.round((Date.now()-start)/1000)}s.`);
+
+                  replaceToast(id, { title: 'Migration complete', message: `${res.migrated} of ${res.total} items migrated in ${Math.round((Date.now()-start)/1000)}s.` });
+
                   // refresh displayed store
                   const persisted = expensesStore.getExpenses();
                   if (Array.isArray(persisted)) setStoredExpenses(persisted);
                 } catch (e) {
                   console.error('Migration failed', e);
-                  alert('Migration failed. Check the console and ensure API is running on http://localhost:4000');
+                  replaceToast(id, { title: 'Migration failed', message: 'Check the console and ensure API is running on http://localhost:4000' });
                 }
               }}>
                 Migrate local data
