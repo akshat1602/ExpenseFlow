@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Icon from '../AppIcon';
 import Image from '../AppImage';
 
@@ -39,16 +40,23 @@ const UserProfileDropdown = ({ userRole = 'employee', isCollapsed = false }) => 
 
   const handleMenuAction = (action) => {
     setIsOpen(false);
-    
+    const navigate = navigateRef?.current || null;
     switch (action) {
-      case 'profile': console.log('Navigate to profile settings');
+      case 'profile':
+        navigate?.('/profile');
         break;
       case 'notifications':
-        console.log('Navigate to notification preferences');
+        navigate?.('/notifications');
         break;
-      case 'help': console.log('Navigate to help & support');
+      case 'help':
+        navigate?.('/help');
         break;
-      case 'logout': console.log('Handle logout');
+      case 'logout':
+        // Clear authentication state (app-specific). We'll clear localStorage keys commonly used.
+        try { localStorage.removeItem('token'); } catch (e) {}
+        try { localStorage.removeItem('expenseflow-theme'); } catch (e) {}
+        // Navigate to login page
+        navigate?.('/login');
         break;
       default:
         break;
@@ -65,6 +73,11 @@ const UserProfileDropdown = ({ userRole = 'employee', isCollapsed = false }) => 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // useNavigate needs to be called in component body; store in ref for handlers declared earlier
+  const navigateRef = React.useRef(null);
+  const navigate = useNavigate();
+  useEffect(() => { navigateRef.current = navigate; }, [navigate]);
 
   if (isCollapsed) {
     return (
