@@ -15,7 +15,7 @@ const ExpenseForm = ({
   ocrData = null,
   exchangeRates = {}
 }) => {
-  const [convertedAmount, setConvertedAmount] = useState('');
+  const [convertedAmount, setConvertedAmount] = useState(null);
   const [localRates, setLocalRates] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
 
@@ -107,15 +107,9 @@ const ExpenseForm = ({
       }
 
       if (amountInUSD === '') {
-        setConvertedAmount('');
+        setConvertedAmount(null);
       } else {
-        // Format as USD with symbol
-        try {
-          const formatted = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(amountInUSD));
-          setConvertedAmount(formatted);
-        } catch (e) {
-          setConvertedAmount(Number(amountInUSD).toFixed(2));
-        }
+        setConvertedAmount(Number(amountInUSD));
       }
     } else {
       setConvertedAmount('');
@@ -211,9 +205,9 @@ const ExpenseForm = ({
               required
               searchable
             />
-            {convertedAmount && (
+            {convertedAmount !== null && (
               <p className="text-xs text-muted-foreground">
-                ≈ ${convertedAmount} USD
+                ≈ {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(convertedAmount)}
               </p>
             )}
           </div>
