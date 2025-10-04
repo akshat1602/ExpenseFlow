@@ -54,6 +54,77 @@ const ManagerDashboard = () => {
   // Combine persisted + mock so managers always see data
   const combinedExpenses = [...(Array.isArray(storedExpenses) ? storedExpenses : []), ...mockExpenses];
 
+  // Small analytics aggregator to provide demo data for the dashboard charts
+  const computeAnalytics = (expenses) => {
+    const now = new Date();
+
+    // Monthly spending for last 6 months
+    const months = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const key = d.toLocaleString('default', { month: 'short' }) + ' ' + d.getFullYear();
+      months.push({ key, start: new Date(d.getFullYear(), d.getMonth(), 1), end: new Date(d.getFullYear(), d.getMonth() + 1, 0) });
+    }
+
+    const monthlySpending = months.map(m => {
+      const amount = expenses.reduce((sum, e) => {
+        try {
+          const d = new Date(e.date);
+          if (d >= m.start && d <= m.end) return sum + (Number(e.amount) || 0);
+        } catch (err) { }
+        return sum;
+      }, 0);
+      return { month: m.key, amount };
+    });
+
+    // Category breakdown
+    const catMap = new Map();
+    expenses.forEach(e => {
+      const name = (e.category || 'Uncategorized').toString();
+      catMap.set(name, (catMap.get(name) || 0) + (Number(e.amount) || 0));
+    });
+    const categoryBreakdown = Array.from(catMap.entries()).map(([name, value]) => ({ name, value }));
+
+    // Approval trends: last 6 weeks aggregated
+    const weeks = [];
+    for (let i = 5; i >= 0; i--) {
+      const start = new Date();
+      start.setDate(start.getDate() - (i * 7));
+      const weekKey = `Wk ${Math.ceil((start.getDate())/7)} ${start.getMonth()+1}`;
+      weeks.push({ start: new Date(start), key: weekKey });
+    }
+    const approvalTrends = weeks.map(w => {
+      const approved = expenses.filter(e => e.status === 'approved' && new Date(e.submittedAt) >= w.start).length;
+      const rejected = expenses.filter(e => e.status === 'rejected' && new Date(e.submittedAt) >= w.start).length;
+      const pending = expenses.filter(e => e.status === 'pending' && new Date(e.submittedAt) >= w.start).length;
+      return { week: w.key, approved, rejected, pending };
+    });
+
+    // Team metrics (simple)
+    const teamMetrics = {
+      pendingApprovals: expenses.filter(e => e.status === 'pending').length,
+      monthlySpending: monthlySpending.reduce((s, m) => s + m.amount, 0),
+      avgProcessingTime: Math.round((Math.random() * 6) + 1), // mocked hours
+      teamSize: 12
+    };
+
+    // Budget utilization per department (mock totals)
+    const deptMap = new Map();
+    expenses.forEach(e => {
+      const dept = e.department || 'General';
+      deptMap.set(dept, (deptMap.get(dept) || 0) + (Number(e.amount) || 0));
+    });
+    const budgetUtilization = Array.from(deptMap.entries()).map(([department, used]) => {
+      const total = Math.max(used * 2, 10000); // simple heuristic total budget
+      const percentage = Math.round((used / total) * 100);
+      return { department, used, total, percentage };
+    });
+
+    return { monthlySpending, categoryBreakdown, approvalTrends, teamMetrics, budgetUtilization };
+  };
+
+  const analyticsData = computeAnalytics(combinedExpenses);
+
   // Defensive filtering logic (same shape as FilterControls expects)
   const filteredExpenses = combinedExpenses.filter(expense => {
     try {
