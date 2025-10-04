@@ -5,6 +5,10 @@ import tagger from "@dhiwise/component-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  // Use relative base so build output references assets relatively. This helps when
+  // the built site is served from a subpath or if build/index.html is viewed
+  // directly from the filesystem.
+  base: './',
   // This changes the out put dir from dist to build
   // comment this out if that isn't relevant for your project
   build: {
