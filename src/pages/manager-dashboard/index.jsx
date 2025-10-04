@@ -9,6 +9,7 @@ import BulkActions from './components/BulkActions';
 import NotificationCenter from './components/NotificationCenter';
 import NotificationToastHost from '../../components/NotificationToast';
 import realtime from '../../lib/realtimeNotifications';
+import expensesStore from '../../lib/expensesStore';
 import Icon from '../../components/AppIcon';
 import Button from '../../components/ui/Button';
 
@@ -104,6 +105,8 @@ const ManagerDashboard = () => {
     }
   ];
 
+  const [storedExpenses, setStoredExpenses] = useState([]);
+
   // Mock analytics data
   const mockAnalyticsData = {
     monthlySpending: [
@@ -170,7 +173,7 @@ const ManagerDashboard = () => {
   ]);
 
   // Filter expenses based on current filters
-  const filteredExpenses = mockExpenses?.filter(expense => {
+  const filteredExpenses = combinedExpenses?.filter(expense => {
     if (filters?.employee !== 'all' && expense?.employee?.toLowerCase()?.replace(' ', '-') !== filters?.employee) return false;
     if (filters?.category !== 'all' && expense?.category?.toLowerCase()?.includes(filters?.category) === false) return false;
     if (filters?.status !== 'all' && expense?.status !== filters?.status) return false;
@@ -239,12 +242,24 @@ const ManagerDashboard = () => {
       setNotifications(prev => [notif, ...prev]);
       handleAddToast(notif);
     });
+    // Load persisted expenses and merge into state
+    try {
+      const persisted = expensesStore.getExpenses();
+      if (Array.isArray(persisted) && persisted.length > 0) {
+        setStoredExpenses(persisted);
+      }
+    } catch (e) {
+      console.error('Failed to load persisted expenses', e);
+    }
 
     return () => {
       unsub();
       realtime.stopRealtimeSimulation();
     };
   }, []);
+
+  // Combined list: stored (new submissions) + mock (defaults)
+  const combinedExpenses = [...(storedExpenses || []), ...(mockExpenses || [])];
 
   return (
     <div className="min-h-screen bg-background">

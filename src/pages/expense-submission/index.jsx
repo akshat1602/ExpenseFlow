@@ -7,6 +7,7 @@ import ReceiptUpload from './components/ReceiptUpload';
 import SubmissionSummary from './components/SubmissionSummary';
 import ProgressIndicator from './components/ProgressIndicator';
 import QuickActions from './components/QuickActions';
+import expensesStore from '../../lib/expensesStore';
 import Icon from '../../components/AppIcon';
 
 const ExpenseSubmission = () => {
@@ -106,17 +107,21 @@ const ExpenseSubmission = () => {
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       // Mock successful submission
-      console.log('Expense submitted successfully:', {
+      const newExpense = {
         ...formData,
         files: uploadedFiles,
         submittedAt: new Date()?.toISOString(),
-        status: 'pending_approval',
-        submittedBy: 'john.smith@company.com'
-      });
+        status: 'pending',
+        submittedBy: 'john.smith@company.com',
+        priority: formData.priority || 'medium'
+      };
+
+      const saved = expensesStore.addExpense(newExpense);
+      console.log('Expense submitted and saved to store:', saved);
 
       // Show success message and redirect
-      alert('Expense submitted successfully! You will be redirected to your dashboard.');
-      navigate('/employee-dashboard');
+  alert('Expense submitted successfully! You will be redirected to your dashboard.');
+  navigate('/employee-dashboard');
       
     } catch (error) {
       console.error('Submission failed:', error);
