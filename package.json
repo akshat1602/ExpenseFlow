@@ -58,7 +58,9 @@
   "scripts": {
     "start": "vite",
     "build": "vite build --sourcemap",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "start:api": "node server/index.js",
+    "dev": "concurrently \"npm run start\" \"npm run start:api\""
   },
   "eslintConfig": {
     "extends": [
@@ -89,5 +91,13 @@
     "tailwindcss": "3.4.6",
     "vite": "5.0.0",
     "vite-tsconfig-paths": "3.6.0"
+  },
+  "optionalDependencies": {
+    "body-parser": "^1.20.3",
+    "concurrently": "^8.2.2",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "sqlite3": "^5.1.7",
+    "uuid": "^9.0.1"
   }
 }
