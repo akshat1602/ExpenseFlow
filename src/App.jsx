@@ -1,9 +1,13 @@
 import React from "react";
 import Routes from "./Routes";
+import ThemeToggle from "./components/ThemeToggle";
 
 function App() {
   return (
-    <Routes />
+    <>
+      <ThemeToggle />
+      <Routes />
+    </>
   );
 }
 

@@ -52,6 +52,44 @@
     --color-destructive-foreground: #FFFFFF; /* white */
   }
 
+  /* Dark theme variables (applies when .dark is present on <html> or <body>) */
+  .dark :root {
+    --color-background: #0b1220; /* dark bg */
+    --color-foreground: #E6EEF8; /* light text */
+    --color-border: #1f2a37; /* darker border */
+    --color-input: #0b1226;
+    --color-ring: #60a5fa;
+
+    --color-card: #071127;
+    --color-card-foreground: #E6EEF8;
+
+    --color-popover: #071127;
+    --color-popover-foreground: #E6EEF8;
+
+    --color-muted: #0f1724;
+    --color-muted-foreground: #98a4b6;
+
+    --color-primary: #60a5fa;
+    --color-primary-foreground: #0b1220;
+
+    --color-secondary: #94a3b8;
+    --color-secondary-foreground: #0b1220;
+
+    --color-accent: #38bdf8;
+    --color-accent-foreground: #0b1220;
+
+    --color-success: #34d399;
+    --color-success-foreground: #052e24;
+
+    --color-warning: #f59e0b;
+    --color-warning-foreground: #2a1500;
+
+    --color-error: #fb7185;
+    --color-error-foreground: #2a0b0f;
+    --color-destructive: #fb7185;
+    --color-destructive-foreground: #2a0b0f;
+  }
+
   * {
     @apply border-border;
   }
