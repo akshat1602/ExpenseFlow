@@ -22,14 +22,13 @@ const ExpenseDetails = () => {
     id: 'user_002',
     name: 'Sarah Johnson',
     email: 'sarah.johnson@company.com',
-    avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
+    avatar: '/assets/images/avatars/manager.jpg',
     role: 'Manager'
   };
 
-    avatar: '/assets/images/avatars/manager.jpg',
   const [expense] = useState({
     id: 'EXP-2024-001',
-    amount: 1250.00,
+    amount: 1250.0,
     originalCurrency: 'EUR',
     convertedAmount: '1,125.50',
     expenseDate: '2024-10-01',
@@ -38,19 +37,20 @@ const ExpenseDetails = () => {
     department: 'Engineering',
     status: 'Under Review',
     priority: 'Medium',
-    description: 'Flight tickets for client meeting in Berlin - Q4 product roadmap discussion with key stakeholders',
+    description:
+      'Flight tickets for client meeting in Berlin - Q4 product roadmap discussion with key stakeholders',
     businessPurpose: `Attended quarterly business review meeting with our largest European client to discuss:\n• Q4 product roadmap alignment\n• Technical integration requirements\n• Contract renewal negotiations\n• Strategic partnership opportunities`,
     employeeName: 'John Smith',
     employeeEmail: 'john.smith@company.com',
     employeeId: 'EMP-001',
-    employeeAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+    employeeAvatar: '/assets/images/avatars/employee.jpg',
     managerName: 'Sarah Johnson',
     managerEmail: 'sarah.johnson@company.com',
-    managerAvatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
-    employeeAvatar: '/assets/images/avatars/employee.jpg',
+    managerAvatar: '/assets/images/avatars/manager.jpg',
+    location: 'Berlin, Germany',
     paymentMethod: 'Corporate Card',
     vendor: 'Lufthansa Airlines',
-    managerAvatar: '/assets/images/avatars/manager.jpg',
+    projectCode: 'PROJ-2024-Q4',
     projectName: 'European Market Expansion'
   });
 
@@ -67,7 +67,6 @@ const ExpenseDetails = () => {
     date: '2024-10-01',
     vendor: 'Lufthansa Airlines',
     tax: '187.50',
-        avatar: '/assets/images/avatars/employee.jpg'
     confidence: 94
   };
 
@@ -79,8 +78,8 @@ const ExpenseDetails = () => {
       status: 'completed',
       approver: {
         name: 'John Smith',
-        avatar: '/assets/images/avatars/manager.jpg'
-        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
+        role: 'Employee',
+        avatar: '/assets/images/avatars/employee.jpg'
       },
       approvedAt: '2024-10-02 09:15 AM',
       comment: 'Submitted expense for client meeting travel with all required documentation.'
@@ -92,9 +91,9 @@ const ExpenseDetails = () => {
       approver: {
         name: 'Sarah Johnson',
         role: 'Manager',
-        avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face'
+        avatar: '/assets/images/avatars/manager.jpg'
       },
-        avatar: '/assets/images/avatars/admin.jpg'
+      assignedAt: '2024-10-02 10:30 AM',
       requiredActions: [
         'Verify business purpose alignment',
         'Check policy compliance',
@@ -107,7 +106,7 @@ const ExpenseDetails = () => {
       approver: {
         name: 'Michael Chen',
         role: 'Finance Manager',
-        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'
+        avatar: '/assets/images/avatars/admin.jpg'
       }
     },
     {
@@ -128,10 +127,11 @@ const ExpenseDetails = () => {
       author: {
         id: 'user_001',
         name: 'John Smith',
-        avatar: '/assets/images/avatars/admin.jpg'
-        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
+        role: 'Employee',
+        avatar: '/assets/images/avatars/employee.jpg'
       },
-      content: 'This expense was for the quarterly business review meeting with our key European client. The meeting was essential for finalizing Q4 deliverables and securing contract renewal.',
+      content:
+        'This expense was for the quarterly business review meeting with our key European client. The meeting was essential for finalizing Q4 deliverables and securing contract renewal.',
       timestamp: '2024-10-02 09:20 AM',
       type: 'comment'
     },
@@ -141,13 +141,14 @@ const ExpenseDetails = () => {
         id: 'user_003',
         name: 'Michael Chen',
         role: 'Finance Manager',
-        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'
+        avatar: '/assets/images/avatars/admin.jpg'
       },
-      content: 'Please confirm if this expense should be allocated to the European Expansion project budget or general travel budget.',
+      content:
+        'Please confirm if this expense should be allocated to the European Expansion project budget or general travel budget.',
       timestamp: '2024-10-02 11:45 AM',
       type: 'clarification'
     }
-        avatar: '/assets/images/avatars/employee.jpg'
+  ]);
 
   // Mock audit log data
   const auditEntries = [
@@ -160,10 +161,10 @@ const ExpenseDetails = () => {
         id: 'user_001',
         name: 'John Smith',
         role: 'Employee',
-        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
+        avatar: '/assets/images/avatars/employee.jpg'
       },
       metadata: {
-        avatar: '/assets/images/avatars/employee.jpg'
+        ipAddress: '192.168.1.100',
         userAgent: 'Chrome/118.0'
       }
     },
@@ -176,11 +177,10 @@ const ExpenseDetails = () => {
         id: 'user_001',
         name: 'John Smith',
         role: 'Employee',
-        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
+        avatar: '/assets/images/avatars/employee.jpg'
       },
       details: {
         'Workflow Stage': 'Manager Review',
-        avatar: '/assets/images/avatars/manager.jpg'
         'Category': 'Travel'
       }
     },
@@ -192,8 +192,8 @@ const ExpenseDetails = () => {
       user: {
         id: 'user_002',
         name: 'Sarah Johnson',
-        avatar: '/assets/images/avatars/admin.jpg'
-        avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face'
+        role: 'Manager',
+        avatar: '/assets/images/avatars/manager.jpg'
       }
     },
     {
@@ -205,7 +205,7 @@ const ExpenseDetails = () => {
         id: 'user_003',
         name: 'Michael Chen',
         role: 'Finance Manager',
-        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'
+        avatar: '/assets/images/avatars/admin.jpg'
       }
     }
   ];
