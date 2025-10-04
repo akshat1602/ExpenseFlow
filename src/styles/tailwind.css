@@ -91,12 +91,16 @@
     --color-destructive-foreground: #2a0b0f;
   }
 
-  * {
-    @apply border-border;
+  /* Apply sensible defaults using CSS variables instead of Tailwind @apply
+     to avoid editor/linter false positives while preserving the same visuals. */
+  *, *::before, *::after {
+    /* keep border color available globally where components expect it */
+    border-color: var(--color-border);
   }
-  
+
   body {
-    @apply bg-background text-foreground;
+    background-color: var(--color-background);
+    color: var(--color-foreground);
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
