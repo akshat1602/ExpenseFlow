@@ -1,6 +1,7 @@
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 import Icon from '../../../components/AppIcon';
+import { predictNextMonth } from '../../../lib/ai-predictor';
 
 const AnalyticsPanel = ({ analyticsData }) => {
   const {
@@ -43,6 +44,25 @@ const AnalyticsPanel = ({ analyticsData }) => {
     );
   };
 
+  // Small prediction card
+  const PredictionCard = ({ monthlySpending }) => {
+    const { prediction, confidence } = predictNextMonth(monthlySpending);
+    return (
+      <div className="p-4 rounded-lg border border-border expense-shadow-sm bg-card">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-accent/10 rounded-md flex items-center justify-center">
+              <Icon name="Zap" size={16} className="text-accent" />
+            </div>
+            <span className="text-sm font-medium text-muted-foreground">Predicted Next Month</span>
+          </div>
+          <div className="text-xs text-muted-foreground">Confidence {confidence}%</div>
+        </div>
+        <div className="text-2xl font-bold text-foreground">${prediction?.toLocaleString()}</div>
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-6">
       {/* Key Metrics */}
@@ -73,6 +93,7 @@ const AnalyticsPanel = ({ analyticsData }) => {
           change={5}
           icon="Users"
         />
+        <PredictionCard monthlySpending={monthlySpending} />
       </div>
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

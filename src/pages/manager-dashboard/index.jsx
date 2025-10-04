@@ -7,6 +7,8 @@ import AnalyticsPanel from './components/AnalyticsPanel';
 import FilterControls from './components/FilterControls';
 import BulkActions from './components/BulkActions';
 import NotificationCenter from './components/NotificationCenter';
+import NotificationToastHost from '../../components/NotificationToast';
+import realtime from '../../lib/realtimeNotifications';
 import Icon from '../../components/AppIcon';
 import Button from '../../components/ui/Button';
 
@@ -218,6 +220,11 @@ const ManagerDashboard = () => {
     );
   };
 
+  // Toasts for realtime notifications
+  const [toasts, setToasts] = useState([]);
+  const handleAddToast = (notif) => setToasts(prev => [notif, ...prev].slice(0,5));
+  const handleRemoveToast = (id) => setToasts(prev => prev.filter(t => t.id !== id));
+
   const tabs = [
     { id: 'expenses', label: 'Expense Management', icon: 'FileText' },
     { id: 'analytics', label: 'Analytics & Reports', icon: 'BarChart3' }
@@ -225,6 +232,18 @@ const ManagerDashboard = () => {
 
   useEffect(() => {
     document.title = 'Manager Dashboard - ExpenseFlow';
+
+    // start realtime notifications simulation and subscribe
+    realtime.startRealtimeSimulation(12000);
+    const unsub = realtime.onNotification((notif) => {
+      setNotifications(prev => [notif, ...prev]);
+      handleAddToast(notif);
+    });
+
+    return () => {
+      unsub();
+      realtime.stopRealtimeSimulation();
+    };
   }, []);
 
   return (
@@ -343,6 +362,7 @@ const ManagerDashboard = () => {
             <AnalyticsPanel analyticsData={mockAnalyticsData} />
           )}
         </div>
+        <NotificationToastHost toasts={toasts} onRemove={handleRemoveToast} />
       </main>
     </div>
   );
