@@ -12,6 +12,7 @@ import realtime from '../../lib/realtimeNotifications';
 import expensesStore from '../../lib/expensesStore';
 import Icon from '../../components/AppIcon';
 import Button from '../../components/ui/Button';
+import { migrateLocalToRemote } from '../../lib/expensesStore';
 
 const ManagerDashboard = () => {
   const navigate = useNavigate();
@@ -96,6 +97,30 @@ const ManagerDashboard = () => {
             <div className="flex items-center space-x-4">
               <NotificationCenter notifications={notifications} onMarkAsRead={(id) => setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))} onMarkAllAsRead={() => setNotifications(prev => prev.map(n => ({ ...n, read: true })))} />
               <QuickActionButton userRole="manager" />
+              <Button onClick={async () => {
+                if (!confirm('Migrate local browser-stored expenses to the local API? Make sure the API (localhost:4000) is running.')) return;
+                try {
+                  const start = Date.now();
+                  let lastProgress = '';
+                  const res = await migrateLocalToRemote((done, total) => {
+                    const pct = Math.round((done / total) * 100);
+                    const msg = `Migrating local data: ${done}/${total} (${pct}%)`;
+                    if (msg !== lastProgress) {
+                      lastProgress = msg;
+                      console.log(msg);
+                    }
+                  });
+                  alert(`Migration complete: ${res.migrated} of ${res.total} items migrated in ${Math.round((Date.now()-start)/1000)}s.`);
+                  // refresh displayed store
+                  const persisted = expensesStore.getExpenses();
+                  if (Array.isArray(persisted)) setStoredExpenses(persisted);
+                } catch (e) {
+                  console.error('Migration failed', e);
+                  alert('Migration failed. Check the console and ensure API is running on http://localhost:4000');
+                }
+              }}>
+                Migrate local data
+              </Button>
             </div>
           </div>
 

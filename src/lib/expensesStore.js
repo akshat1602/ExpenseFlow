@@ -154,6 +154,52 @@ export async function syncFromRemote() {
   return null;
 }
 
+// Migrate localStorage entries to the local API. Calls create on any local entry
+// that is not present remotely. Accepts an optional onProgress callback: (done,total,item)=>void
+export async function migrateLocalToRemote(onProgress) {
+  const local = readStore();
+  if (!Array.isArray(local) || local.length === 0) return { migrated: 0, total: 0 };
+
+  const remote = (await fetchExpensesRemote()) || [];
+  const remoteIds = new Set((remote || []).map(r => r.id));
+
+  let migrated = 0;
+  const total = local.length;
+
+  for (let i = 0; i < local.length; i++) {
+    const item = local[i];
+    try {
+      if (!item || !item.id) {
+        // ensure item has an id
+        item.id = item && item.id ? item.id : generateId();
+      }
+
+      if (remoteIds.has(item.id)) {
+        // already present remotely
+      } else {
+        const created = await createExpenseRemote(item);
+        if (created) {
+          migrated++;
+          remoteIds.add(created.id);
+        }
+      }
+    } catch (e) {
+      // ignore single-item failure and continue
+      console.error('migrateLocalToRemote: failed on item', item, e);
+    }
+
+    if (typeof onProgress === 'function') {
+      try { onProgress(i + 1, total, item); } catch (e) { /* ignore */ }
+    }
+  }
+
+  // After migration, refresh local store from remote if available
+  const finalRemote = await fetchExpensesRemote();
+  if (Array.isArray(finalRemote)) writeStore(finalRemote);
+
+  return { migrated, total };
+}
+
 export default {
   getExpenses,
   addExpense,
