@@ -16,6 +16,7 @@ const ExpenseForm = ({
   exchangeRates = {}
 }) => {
   const [convertedAmount, setConvertedAmount] = useState('');
+  const [localRates, setLocalRates] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
 
   // Mock categories for expense types
@@ -38,22 +39,88 @@ const ExpenseForm = ({
     { value: 'EUR', label: 'EUR - Euro' },
     { value: 'GBP', label: 'GBP - British Pound' },
     { value: 'JPY', label: 'JPY - Japanese Yen' },
+    { value: 'INR', label: 'INR - Indian Rupee' },
     { value: 'CAD', label: 'CAD - Canadian Dollar' },
     { value: 'AUD', label: 'AUD - Australian Dollar' },
     { value: 'CHF', label: 'CHF - Swiss Franc' },
     { value: 'CNY', label: 'CNY - Chinese Yuan' }
   ];
 
+  // Fetch live exchange rates if none were passed via props.
+  useEffect(() => {
+    let cancelled = false;
+
+    const shouldFetch = !exchangeRates || Object.keys(exchangeRates || {}).length === 0;
+    if (!shouldFetch) return;
+
+    const controller = new AbortController();
+    const fetchRates = async () => {
+      try {
+        // exchangerate.host provides free rates without API key
+        const symbols = ['USD','EUR','GBP','JPY','CAD','AUD','CHF','CNY','INR'].join(',');
+        const res = await fetch(`https://api.exchangerate.host/latest?base=USD&symbols=${symbols}`, { signal: controller.signal });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!cancelled && data?.rates) {
+          setLocalRates(data.rates || {});
+        }
+      } catch (e) {
+        // ignore fetch errors silently; UI will fall back to whatever rates are available
+      }
+    };
+
+    fetchRates();
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [exchangeRates]);
+
   // Calculate converted amount when currency or amount changes
   useEffect(() => {
+    // Accept exchangeRates either as a flat object { INR: 83, USD: 1 } or wrapped { rates: { ... } }
+    const providedRates = exchangeRates && exchangeRates.rates ? exchangeRates.rates : exchangeRates;
+    const ratesSource = (providedRates && Object.keys(providedRates).length > 0) ? providedRates : localRates;
     if (formData?.amount && formData?.currency && formData?.currency !== 'USD') {
-      const rate = exchangeRates?.[formData?.currency] || 1;
-      const converted = (parseFloat(formData?.amount) / rate)?.toFixed(2);
-      setConvertedAmount(converted);
+      const amount = parseFloat(formData?.amount) || 0;
+      const currency = formData?.currency;
+      const rateForCurrency = ratesSource?.[currency];
+      const rateForUSD = ratesSource?.['USD'];
+
+      let amountInUSD = '';
+
+      if (rateForCurrency && rateForUSD) {
+        // ratesSource appears to be rates relative to some BASE (not necessarily USD)
+        // If both USD and the target currency are present, compute cross rate:
+        // amount_in_usd = amount * (rate_USD / rate_currency)
+        const computed = amount * (Number(rateForUSD) / Number(rateForCurrency));
+        amountInUSD = computed;
+      } else if (rateForCurrency) {
+        // Assume rates are provided as 1 USD = rateForCurrency (base=USD)
+        // So to convert currency -> USD: amount / (currency per USD)
+        const computed = amount / Number(rateForCurrency);
+        amountInUSD = computed;
+      } else {
+        // No rate available, fallback to empty
+        amountInUSD = '';
+      }
+
+      if (amountInUSD === '') {
+        setConvertedAmount('');
+      } else {
+        // Format as USD with symbol
+        try {
+          const formatted = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(amountInUSD));
+          setConvertedAmount(formatted);
+        } catch (e) {
+          setConvertedAmount(Number(amountInUSD).toFixed(2));
+        }
+      }
     } else {
       setConvertedAmount('');
     }
-  }, [formData?.amount, formData?.currency, exchangeRates]);
+  }, [formData?.amount, formData?.currency, exchangeRates, localRates]);
 
   // Update form with OCR data when available
   useEffect(() => {

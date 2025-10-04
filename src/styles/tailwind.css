@@ -53,7 +53,8 @@
   }
 
   /* Dark theme variables (applies when .dark is present on <html> or <body>) */
-  .dark :root {
+  /* Use :root.dark to target when html has the .dark class. Also include .dark as a fallback. */
+  :root.dark, .dark {
     --color-background: #0b1220; /* dark bg */
     --color-foreground: #E6EEF8; /* light text */
     --color-border: #1f2a37; /* darker border */
