@@ -1,22 +1,27 @@
 // Simple localStorage-backed expenses store for demo persistence across pages
 const STORAGE_KEY = 'expenseflow-expenses';
 
+const hasLocalStorage = () => typeof window !== 'undefined' && typeof window.localStorage !== 'undefined';
+
 const readStore = () => {
+  if (!hasLocalStorage()) return [];
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
     return parsed;
   } catch (e) {
+    // Don't throw from here — return empty list to keep UI stable
     console.error('Failed to read expenses from localStorage', e);
     return [];
   }
 };
 
 const writeStore = (arr) => {
+  if (!hasLocalStorage()) return;
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
   } catch (e) {
     console.error('Failed to write expenses to localStorage', e);
   }
@@ -81,3 +86,4 @@ export default {
   saveExpenses,
   clearExpenses
 };
+
